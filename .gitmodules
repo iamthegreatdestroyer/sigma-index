@@ -1,0 +1,9 @@
+[submodule "dependencies/agentmem"]
+	path = dependencies/agentmem
+	url = https://github.com/iamthegreatdestroyer/agentmem.git
+[submodule "dependencies/ann-hybrid"]
+	path = dependencies/ann-hybrid
+	url = https://github.com/iamthegreatdestroyer/ann-hybrid.git
+[submodule "dependencies/archaeo"]
+	path = dependencies/archaeo
+	url = https://github.com/iamthegreatdestroyer/archaeo.git
