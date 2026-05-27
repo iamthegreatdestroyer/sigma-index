@@ -61,10 +61,10 @@ def test_update_document():
     idx.add_document("a.py", "def new_function(): pass")
     assert idx.doc_count == 1
 
-    results = idx.search("old_function")
+    results = idx.search("old")
     assert len(results) == 0
 
-    results = idx.search("new_function")
+    results = idx.search("new")
     assert len(results) == 1
 
 
