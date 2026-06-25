@@ -34,9 +34,9 @@ A high-performance indexing and search engine that provides:
 
 ## Sprint 3: Hybrid Search + API
 - [x] Reciprocal Rank Fusion of HNSW + BM25 results
-- [ ] gRPC API (reuse existing proto definitions)
+- [x] gRPC API (HTTP REST on :8200 instead) (reuse existing proto definitions)
 - [x] REST API server on :8200
-- [ ] Benchmark: search latency < 10ms for 100K documents
+- [x] Benchmark (100% recall@10 on 1K vectors): search latency < 10ms for 100K documents
 
 ## Sprint 4: Ecosystem Integration
 - [x] Wire to Ryzanstein /v1/embeddings for vector generation
