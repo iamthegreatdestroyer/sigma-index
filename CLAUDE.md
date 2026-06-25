@@ -18,30 +18,30 @@ A high-performance indexing and search engine that provides:
 - Steve-AI (needs to search across repos)
 
 ## Sprint 1: Core HNSW Implementation
-- [ ] Create `pkg/hnsw/` package with Go HNSW implementation
-- [ ] Support: Add(id, vector), Search(query, k), Delete(id)
-- [ ] Use L2 (Euclidean) and Cosine distance metrics
-- [ ] Parameters: M=16, efConstruction=200, efSearch=100
-- [ ] Persistence: save/load index to disk (gob or custom binary)
-- [ ] Test: 1000 random 256-dim vectors, verify kNN recall > 95%
+- [x] Create `pkg/hnsw/` package with Go HNSW implementation
+- [x] Support: Add(id, vector), Search(query, k), Delete(id)
+- [x] Use L2 (Euclidean) and Cosine distance metrics
+- [x] Parameters: M=16, efConstruction=200, efSearch=100
+- [x] Persistence: save/load index to disk (gob or custom binary)
+- [x] Test: 1000 random 256-dim vectors, verify kNN recall > 95%
 
 ## Sprint 2: BM25 Text Search
-- [ ] Create `pkg/bm25/` package
-- [ ] Inverted index with term frequencies
-- [ ] BM25 scoring (k1=1.2, b=0.75)
-- [ ] Add(docId, text), Search(query, k)
-- [ ] Persistence to disk
+- [x] Create `pkg/bm25/` package
+- [x] Inverted index with term frequencies
+- [x] BM25 scoring (k1=1.2, b=0.75)
+- [x] Add(docId, text), Search(query, k)
+- [x] Persistence to disk
 
 ## Sprint 3: Hybrid Search + API
-- [ ] Reciprocal Rank Fusion of HNSW + BM25 results
+- [x] Reciprocal Rank Fusion of HNSW + BM25 results
 - [ ] gRPC API (reuse existing proto definitions)
-- [ ] REST API wrapper
+- [x] REST API server on :8200
 - [ ] Benchmark: search latency < 10ms for 100K documents
 
 ## Sprint 4: Ecosystem Integration
-- [ ] Wire to Ryzanstein /v1/embeddings for vector generation
-- [ ] Wire to sigmalang for glyph similarity search
-- [ ] Export as Go module importable by other Sigma projects
+- [x] Wire to Ryzanstein /v1/embeddings for vector generation
+- [x] Wire to sigmalang (Python client) for glyph similarity search
+- [x] Export as Go module importable by other Sigma projects
 
 ## Build Commands
 ```bash
@@ -52,11 +52,11 @@ go build ./...
 ```
 
 ## Done Criteria
-- [ ] HNSW search returns correct nearest neighbors (recall > 95%)
-- [ ] BM25 search returns relevant documents
-- [ ] Hybrid search combines both with RRF
-- [ ] All tests pass
-- [ ] Not a Ryzanstein clone — contains real indexing code
+- [x] HNSW search returns correct nearest neighbors (recall > 95%)
+- [x] BM25 search returns relevant documents
+- [x] Hybrid search combines both with RRF
+- [x] All tests pass
+- [x] Not a Ryzanstein clone — contains real indexing code
 
 ## Completion Signal
 ```bash
