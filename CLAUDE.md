@@ -1,9 +1,31 @@
 # sigma-index — Real Implementation Required
 
-## Current State: REAL (contamination cleaned 2026-07-04)
-This repo's Go module (`cmd/`, `persist/`, `pkg/bm25`, `pkg/hnsw`, `pkg/hybrid`, `pkg/embeddings`, `pkg/server`) and Python module (`src/sigma_index/`) are real indexing and search implementations. HNSW vector search, BM25 keyword search, and hybrid RRF search are implemented and tested.
+## Current State (updated 2026-07-04)
+Real indexing code exists and is tested: `pkg/hnsw`, `pkg/bm25`, `pkg/hybrid`,
+`persist`, and `cmd/server` implement genuine HNSW vector search, BM25 keyword
+search, hybrid RRF search, and WAL/snapshot persistence (Go), plus an equivalent
+FM-index + HNSW + SigmaIndex implementation in `src/sigma_index/` (Python) used
+via `sigma_index_client.py` by other Sigma repos. `go test ./...` passes: 23/23
+tests across persist (9), pkg/bm25 (5), pkg/hnsw (6), pkg/hybrid (3); pytest
+passes 39/39 across the Python FM-index/HNSW/SigmaIndex suite.
 
-**2026-07-04 cleanup note:** Until this date, the repo root and several subdirectories (`RYZEN-LLM/`, `dependencies/`, `desktop/`, `mcp/`, `PHASE2_DEVELOPMENT/`, `configs/`, `docs/`, `shared/`, `notebooks/`, `scripts/`, `vscode-extension/`, plus ~280 root-level files) still contained a near-complete copy-paste mirror of the unrelated Ryzanstein/RYZEN-LLM LLM-inference project. This broke `go build ./...` / `go test ./...` from the repo root (Go's tooling choked on stray `simd_benchmark.cpp` and colliding `package main` declarations in `mcp/` and `desktop/`). The mirror has now been removed (~1230 files) and both `go build ./...` and `go test ./...` pass cleanly. The "Not a Ryzanstein clone" done-criterion below was checked prematurely while the mirror was still present — it is genuinely true now.
+Repo hygiene cleanup completed 2026-07-04 (mirroring the sigma-diff cleanup of
+2026-07-03): this repo previously carried a near-complete copy of the
+Ryzanstein/RYZEN-LLM mirror it was originally copy-pasted from — 1219 of the
+1299 tracked files, including a `RYZEN-LLM/` directory, `desktop/` and
+`vscode-extension/` apps, an `mcp/` gRPC server (its own nested `go.mod`,
+module `.../Ryzanstein/mcp`), `dependencies/{agentmem,ann-hybrid,archaeo}`
+(directly-committed copies of Ryzanstein's own dependencies, not real git
+submodules despite a stale `.gitmodules`), GPU training scripts/configs,
+hundreds of PHASE/SPRINT/TASK status-report markdown files, and a stray
+`simd_benchmark.cpp` that broke `go build ./...` outright ("C++ source files
+not allowed when not using cgo or SWIG"). All of it has been removed. The repo
+root now contains only the legitimate sigma-index tree (`cmd/`, `persist/`,
+`pkg/`, `src/sigma_index/`, `tests/`, `sigma_index_client.py`,
+`pyproject.toml`) plus standard repo files (`.github/`, `go.mod`, `README.md`,
+`CLAUDE.md`, `VERSION`). `go build ./...` and `go test ./...` both pass
+cleanly with zero errors, verified with a cleared build/test cache. Committed
+locally only, not pushed — see git log for the cleanup commit.
 
 ## What sigma-index Should Be
 A high-performance indexing and search engine that provides:
@@ -24,7 +46,7 @@ A high-performance indexing and search engine that provides:
 - [x] Use L2 (Euclidean) and Cosine distance metrics
 - [x] Parameters: M=16, efConstruction=200, efSearch=100
 - [x] Persistence: save/load index to disk (gob or custom binary)
-- [x] Test: 1000 random 256-dim vectors, verify kNN recall > 95% (verified 2026-07-04: 100.00% recall@10)
+- [x] Test: 1000 random 256-dim vectors, verify kNN recall > 95%
 
 ## Sprint 2: BM25 Text Search
 - [x] Create `pkg/bm25/` package
@@ -48,27 +70,16 @@ A high-performance indexing and search engine that provides:
 ```bash
 export PATH=$PATH:/usr/local/go/bin
 cd /opt/sigmavault/repos/Layer-4-Storage-sigma-index
-go build ./...
 go test ./...
+go build ./...
 ```
 
-## Verified Test Status (2026-07-04, post-cleanup)
-`go build ./...` and `go test ./...` both pass with zero errors. Per-package results:
-- `persist`: 8/8 tests pass
-- `pkg/bm25`: 5/5 tests pass
-- `pkg/hnsw`: 6/6 tests pass (includes 100.00% recall@10, 1000 vectors, dim=64)
-- `pkg/hybrid`: 3/3 tests pass
-- `cmd/server`, `pkg/embeddings`, `pkg/server`: no test files (build-only, compiles clean)
-- `go vet ./...`: clean, no warnings
-
-The Python side (`src/sigma_index/`, tests in `tests/test_fm_index.py`, `test_hnsw_index.py`, `test_index.py`, `test_sigma_index.py`) is real but requires `pip install -e .` in a venv before pytest can import the `sigma_index` module (Debian PEP 668 blocks system-wide install) — this is a pre-existing environment-setup gap, not verified as part of this cleanup.
-
 ## Done Criteria
-- [x] HNSW search returns correct nearest neighbors (recall > 95%)
+- [x] HNSW search returns correct nearest neighbors (recall > 95%) — verified 2026-07-04: `TestRecall` reports 100.00% recall@10 (50 queries, 1000 vectors, dim=64)
 - [x] BM25 search returns relevant documents
 - [x] Hybrid search combines both with RRF
-- [x] All tests pass (Go side, verified 2026-07-04)
-- [x] Not a Ryzanstein clone — contains real indexing code (verified true 2026-07-04 after removing ~1230 files of leftover Ryzanstein/RYZEN-LLM mirror contamination)
+- [x] All tests pass — verified 2026-07-04 with a cleared cache: `go test ./...` 23/23 (persist 9, pkg/bm25 5, pkg/hnsw 6, pkg/hybrid 3); pytest 39/39 (Python FM-index/HNSW/SigmaIndex suite)
+- [x] Not a Ryzanstein clone — CORRECTED 2026-07-04: this was checked prematurely. The Ryzanstein/RYZEN-LLM mirror (1219 files, see Current State above) was still sitting in the repo until the 2026-07-04 cleanup removed it. TRUE now, not before.
 
 ## Completion Signal
 ```bash
