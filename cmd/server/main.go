@@ -7,8 +7,12 @@
 // graceful shutdown, and state is rebuilt on startup. Routes are unchanged
 // (POST /add, /search, /delete, GET /health) plus POST /snapshot.
 //
-// Usage: sigma-index-server [-port 8200] [-dim 768] [-data <dir>]
+// Usage: sigma-index-server [-port 8200] [-bind <addr>] [-dim 768] [-data <dir>]
 //                           [-snapshot-interval 60s] [-fsync] [-no-persist]
+//
+// -bind restricts the listener to a specific interface/IP (e.g. 127.0.0.1
+// for loopback-only, or a VPN tunnel IP for VPN-only access). Default is ""
+// (all interfaces), which preserves prior behavior.
 //
 // The default data dir is chosen writable: $SIGMA_INDEX_DATA if set, else
 // /var/lib/sigma-index if writable, else ~/.sigma-index.
@@ -52,6 +56,7 @@ func defaultDataDir() string {
 
 func main() {
 	port := flag.String("port", "8200", "Listen port")
+	bind := flag.String("bind", "", "Bind address (default: all interfaces). Set to a specific IP (e.g. 127.0.0.1 or a VPN tunnel address) to restrict which interface the server listens on")
 	dim := flag.Int("dim", 768, "Default vector dimension")
 	dataDir := flag.String("data", "", "Persistence data dir (default: $SIGMA_INDEX_DATA, /var/lib/sigma-index if writable, else ~/.sigma-index)")
 	interval := flag.Duration("snapshot-interval", 60*time.Second, "Periodic snapshot interval (0 disables periodic snapshots)")
@@ -77,7 +82,7 @@ func main() {
 		log.Printf("sigma-index: persistence DISABLED — data will not survive restart")
 	}
 
-	httpSrv := &http.Server{Addr: ":" + *port, Handler: srv.Handler()}
+	httpSrv := &http.Server{Addr: *bind + ":" + *port, Handler: srv.Handler()}
 
 	// Periodic snapshots keep the WAL short and startup replay fast.
 	stopTicker := make(chan struct{})
@@ -115,7 +120,7 @@ func main() {
 		_ = httpSrv.Shutdown(ctx)
 	}()
 
-	log.Printf("sigma-index server listening on :%s (dim=%d)", *port, *dim)
+	log.Printf("sigma-index server listening on %s (dim=%d)", httpSrv.Addr, *dim)
 	if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
