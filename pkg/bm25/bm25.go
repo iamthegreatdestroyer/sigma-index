@@ -159,6 +159,13 @@ func (idx *Index) Search(query string, k int) []SearchResult {
 	return results
 }
 
+// Doc returns the original text stored for id, or "" if the id is unknown.
+func (idx *Index) Doc(id string) string {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	return idx.docs[id]
+}
+
 func (idx *Index) Len() int {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()

@@ -15,6 +15,7 @@ type SearchResult struct {
 	Score    float64
 	VecDist  float32
 	TextRank int
+	Text     string // original document text (added for RAG consumers; additive, no json tags)
 }
 
 type Index struct {
@@ -43,7 +44,7 @@ func (idx *Index) SearchVector(query []float32, k int) []SearchResult {
 	raw := idx.vectors.Search(query, k, 0)
 	results := make([]SearchResult, len(raw))
 	for i, r := range raw {
-		results[i] = SearchResult{ID: r.ID, VecDist: r.Distance, Score: float64(1 / (1 + r.Distance))}
+		results[i] = SearchResult{ID: r.ID, VecDist: r.Distance, Score: float64(1 / (1 + r.Distance)), Text: idx.text.Doc(r.ID)}
 	}
 	return results
 }
@@ -52,7 +53,7 @@ func (idx *Index) SearchText(query string, k int) []SearchResult {
 	raw := idx.text.Search(query, k)
 	results := make([]SearchResult, len(raw))
 	for i, r := range raw {
-		results[i] = SearchResult{ID: r.ID, Score: r.Score, TextRank: i + 1}
+		results[i] = SearchResult{ID: r.ID, Score: r.Score, TextRank: i + 1, Text: idx.text.Doc(r.ID)}
 	}
 	return results
 }
@@ -84,6 +85,7 @@ func (idx *Index) Search(vectorQuery []float32, textQuery string, k int) []Searc
 			Score:    score,
 			VecDist:  vecDists[id],
 			TextRank: textRanks[id],
+			Text:     idx.text.Doc(id),
 		})
 	}
 
